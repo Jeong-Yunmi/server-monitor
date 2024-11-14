@@ -1,5 +1,4 @@
-// lib/features/dashboard/widgets/resource_overview_card.dart
-
+// flutter_client/lib/features/dashboard/widgets/resource_overview_card.dart
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import '../models/dashboard_stats.dart';

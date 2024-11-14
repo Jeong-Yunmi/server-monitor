@@ -1,5 +1,4 @@
-// lib/features/dashboard/widgets/server_status_card.dart
-
+// flutter_client/lib/features/dashboard/widgets/server_status_card.dart
 import 'package:flutter/material.dart';
 import '../../../shared/models/server.dart';
 import '../../../shared/models/server_metrics.dart';
@@ -9,10 +8,10 @@ class ServerStatusCard extends StatelessWidget {
   final Map<String, ServerMetrics> metrics;
 
   const ServerStatusCard({
-    Key? key,
+    super.key,
     required this.servers,
     required this.metrics,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

@@ -1,5 +1,4 @@
-// lib/features/dashboard/widgets/top_processes_card.dart
-
+// flutter_client/lib/features/dashboard/widgets/top_processes_card.dart
 import 'package:flutter/material.dart';
 import '../../../shared/models/process_info.dart';
 
@@ -7,9 +6,9 @@ class TopProcessesCard extends StatelessWidget {
   final List<ProcessInfo> processes;
 
   const TopProcessesCard({
-    Key? key,
+    super.key,
     required this.processes,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -90,7 +89,7 @@ class TopProcessesCard extends StatelessWidget {
           fontWeight: FontWeight.w500,
         ),
         _buildTableCell('${cpu.toStringAsFixed(1)}%'),
-        _buildTableCell('${ram.toStringAsFixed(1)}'),
+        _buildTableCell(ram.toStringAsFixed(1)),
         _buildTableCell(network),
       ],
     );

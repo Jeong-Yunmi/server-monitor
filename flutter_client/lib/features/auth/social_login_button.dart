@@ -1,5 +1,4 @@
-// lib/features/auth/widgets/social_login_button.dart
-
+// flutter_client/lib/features/auth/social_login_button.dart
 import 'package:flutter/material.dart';
 
 class SocialLoginButton extends StatelessWidget {

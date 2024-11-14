@@ -1,5 +1,4 @@
-// lib/features/dashboard/dashboard_provider.dart
-
+// flutter_client/lib/features/dashboard/dashboard_provider.dart
 import 'dart:async';
 import 'package:flutter/material.dart';
 import '../../shared/models/server.dart';

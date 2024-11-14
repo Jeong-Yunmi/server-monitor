@@ -1,4 +1,4 @@
-// lib/core/api/api_client.dart
+// flutter_client/lib/core/api/api_client.dart
 
 import 'package:dio/dio.dart';
 import '../error/exceptions.dart';

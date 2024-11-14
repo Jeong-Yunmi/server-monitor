@@ -1,4 +1,4 @@
-// lib/core/animations/page_transitions.dart
+// flutter_client/lib/core/animations/page_transitions.dart
 
 import 'package:flutter/material.dart';
 

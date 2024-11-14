@@ -1,5 +1,4 @@
-// lib/features/dashboard/models/dashboard_stats.dart
-
+// flutter_client/lib/features/dashboard/models/dashboard_stats.dart
 class DashboardStats {
   final int totalServers;
   final int activeServers;

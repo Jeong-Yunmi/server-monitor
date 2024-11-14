@@ -1,4 +1,4 @@
-// lib/core/animations/loading_shimmer.dart
+// flutter_client/lib/core/animations/loading_shimmer.dart
 
 import 'package:flutter/material.dart';
 
@@ -8,11 +8,11 @@ class LoadingShimmer extends StatefulWidget {
   final double borderRadius;
 
   const LoadingShimmer({
-    Key? key,
+    super.key,
     required this.width,
     required this.height,
     this.borderRadius = 8,
-  }) : super(key: key);
+  });
 
   @override
   State<LoadingShimmer> createState() => _LoadingShimmerState();

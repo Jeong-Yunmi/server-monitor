@@ -1,5 +1,4 @@
-// lib/core/di/service_locator.dart
-
+// flutter_client/lib/core/di/service_locator.dart
 import 'package:get_it/get_it.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../api/api_client.dart';

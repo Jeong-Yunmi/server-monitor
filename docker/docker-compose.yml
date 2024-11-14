@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+  db:
+    image: timescale/timescaledb:latest-pg14
+    environment:
+      POSTGRES_DB: flick
+      POSTGRES_USER: flickuser
+      POSTGRES_PASSWORD: flickpass
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U flickuser -d flick"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  server:
+    build:
+      context: ../rust_server  # 경로 수정
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      DATABASE_URL: "postgres://flickuser:flickpass@db:5432/flick"
+      RUST_LOG: "info"
+      dKC4IdrUUjbO9CVS+1ETpBPJinRAWrzPn914SB5Vi+g=: "your-secret-key"
+      HOST: "0.0.0.0"
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
+

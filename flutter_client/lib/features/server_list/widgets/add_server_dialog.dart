@@ -2,7 +2,6 @@
 
 import 'package:flutter/material.dart';
 import '../models/server_location.dart';
-import '../server_list_provider.dart';
 
 class AddServerDialog extends StatefulWidget {
   const AddServerDialog({Key? key}) : super(key: key);

@@ -1,4 +1,4 @@
-// lib/core/animations/animated_list_item.dart
+// flutter_client/lib/core/animations/animated_list_item.dart
 
 import 'package:flutter/material.dart';
 
@@ -8,11 +8,11 @@ class AnimatedListItem extends StatelessWidget {
   final bool animate;
 
   const AnimatedListItem({
-    Key? key,
+    super.key,
     required this.child,
     required this.index,
     this.animate = true,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

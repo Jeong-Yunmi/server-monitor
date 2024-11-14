@@ -1,5 +1,4 @@
-// lib/core/routes/custom_page_route.dart
-
+// flutter_client/lib/core/routes/custom_page_route.dart
 import 'package:flutter/material.dart';
 
 class CustomPageRoute<T> extends PageRoute<T> {

@@ -1,5 +1,4 @@
-// lib/features/auth/login_screen.dart
-
+// flutter_client/lib/features/auth/login_screen.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'auth_provider.dart';

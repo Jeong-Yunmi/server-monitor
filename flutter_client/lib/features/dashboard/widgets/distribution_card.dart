@@ -1,5 +1,4 @@
-// lib/features/dashboard/widgets/distribution_card.dart
-
+// flutter_client/lib/features/dashboard/widgets/distribution_card.dart
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import '../../../shared/models/server_metrics.dart';
