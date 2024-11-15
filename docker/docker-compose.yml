@@ -1,37 +1,43 @@
 version: '3.8'
 
 services:
-  db:
+  timescaledb:
     image: timescale/timescaledb:latest-pg14
     environment:
-      POSTGRES_DB: flick
+      POSTGRES_DB: flickdb
       POSTGRES_USER: flickuser
       POSTGRES_PASSWORD: flickpass
     ports:
       - "5432:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - timescaledb_data:/var/lib/postgresql/data
+      - ./init-scripts:/docker-entrypoint-initdb.d
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U flickuser -d flick"]
+      test: ["CMD-SHELL", "pg_isready -U flickuser -d flickdb"]
       interval: 10s
       timeout: 5s
       retries: 5
 
-  server:
+  rust_server:
     build:
-      context: ../rust_server  # 경로 수정
-      dockerfile: Dockerfile
+      context: ../rust_server
+      dockerfile: Dockerfile.dev
     ports:
       - "8080:8080"
+    volumes:
+      - ../rust_server:/usr/src/app
+      - cargo_cache:/usr/local/cargo/registry
+      - target_cache:/usr/src/app/target
     environment:
-      DATABASE_URL: "postgres://flickuser:flickpass@db:5432/flick"
-      RUST_LOG: "info"
-      dKC4IdrUUjbO9CVS+1ETpBPJinRAWrzPn914SB5Vi+g=: "your-secret-key"
-      HOST: "0.0.0.0"
+      DATABASE_URL: "postgres://flickuser:flickpass@timescaledb:5432/flickdb"
+      RUST_LOG: "debug"
+      RUST_BACKTRACE: 1
+      dKC4IdrUUjbO9CVS+1ETpBPJinRAWrzPn914SB5Vi+g=: "your-development-secret-key"
     depends_on:
-      db:
+      timescaledb:
         condition: service_healthy
 
 volumes:
-  postgres_data:
-
+  timescaledb_data:
+  cargo_cache:
+  target_cache:

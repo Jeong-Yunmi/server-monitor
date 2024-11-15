@@ -9,4 +9,3 @@ pub struct Claims {
     pub exp: i64,       // Expiration time
     pub iat: i64,       // Issued at
 }
- 

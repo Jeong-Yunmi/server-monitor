@@ -14,6 +14,13 @@ impl Repository {
         Self { pool }
     }
 
+
+    // fn clone(&self) -> Self {
+    //     Self {
+    //         pool: self.pool.clone(),
+    //     }
+    // } // clone 함수 일단 추가
+
     pub async fn create_server(&self, server: Server) -> Result<Server> {
         let result = sqlx::query_as!(
             Server,

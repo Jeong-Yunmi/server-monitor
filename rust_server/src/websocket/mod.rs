@@ -1,4 +1,5 @@
 // src/websocket/mod.rs
+mod handlers;
 mod server;
 
 use actix_web::{web, Error, HttpRequest, HttpResponse};

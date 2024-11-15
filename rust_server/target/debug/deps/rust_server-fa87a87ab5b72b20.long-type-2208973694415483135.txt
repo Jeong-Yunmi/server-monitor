@@ -1,0 +1,1 @@
+fn(actix_web::web::Data<{type error}>, actix_web::web::Path<std::string::String>, actix_web::web::Json<UpdateServerStatusRequest>) -> impl futures::Future<Output = Result<HttpResponse, actix_web::Error>> {update_server_status}

@@ -7,14 +7,17 @@ use tokio::time::{Duration, Instant};
 use serde_json::json;
 use std::collections::HashMap;
 use crate::monitoring;
+use crate::monitoring::MonitoringService;
+use std::sync::{Mutex, Arc};
 
 const HEARTBEAT_INTERVAL: Duration = Duration::from_secs(5);
 const CLIENT_TIMEOUT: Duration = Duration::from_secs(10);
 
 pub struct WebSocketConnection {
     last_heartbeat: Instant,
-    monitoring_service: web::Data<monitoring::MonitoringService>,
-    subscription_handles: HashMap<String, SpawnHandle>,
+    monitoring_service: web::Data<MonitoringService>,
+    subscription_handles: Arc<Mutex<HashMap<String, SpawnHandle>>>,
+    server_id: Option<String>,
 }
 
 impl Actor for WebSocketConnection {
@@ -51,11 +54,12 @@ impl StreamHandler<Result<ws::Message, ws::ProtocolError>> for WebSocketConnecti
 }
 
 impl WebSocketConnection {
-    pub fn new(monitoring_service: web::Data<monitoring::MonitoringService>) -> Self {
+    pub fn new(monitoring_service: web::Data<MonitoringService>) -> Self {
         Self {
             last_heartbeat: Instant::now(),
             monitoring_service,
-            subscription_handles: HashMap::new(),
+            subscription_handles: Arc::new(Mutex::new(HashMap::new())),
+            server_id: None,
         }
     }
 
@@ -95,7 +99,7 @@ impl WebSocketConnection {
             ctx.wait(fut);
         });
 
-        self.subscription_handles.insert("global".to_string(), handle);
+        self.subscription_handles.lock().unwrap().insert("global".to_string(), handle);
     }
 
     fn handle_command(&mut self, command: serde_json::Value, ctx: &mut ws::WebsocketContext<Self>) {
@@ -103,12 +107,19 @@ impl WebSocketConnection {
             match cmd_type {
                 "subscribe" => {
                     if let Some(server_id) = command.get("server_id").and_then(|v| v.as_str()) {
-                        // 기존 구독 취소
-                        if let Some(handle) = self.subscription_handles.get(server_id) {
-                            ctx.cancel_future(*handle);
+                        // Cancel existing subscription
+                        match self.subscription_handles.lock() {
+                            Ok(handles) => {
+                                if let Some(handle) = handles.get(server_id) {
+                                    ctx.cancel_future(*handle);
+                                }
+                            },
+                            Err(e) => {
+                                log::error!("Failed to lock subscription handles: {}", e);
+                            }
                         }
 
-                        let monitoring_service = monitoring::MonitoringService::new(); // or similar initialization
+                        let _monitoring_service = monitoring::MonitoringService::new(); // or similar initialization
                         let server_id = self.server_id.clone();
                         
                         let handle = ctx.run_interval(Duration::from_secs(1), move |actor, ctx| {
@@ -116,13 +127,17 @@ impl WebSocketConnection {
                             let server_id = server_id.clone();
                             
                             let fut = async move {
-                                if let Some(metrics) = monitoring.get_server_metrics(&server_id).await {
-                                    let message = json!({
-                                        "type": "server_metrics",
-                                        "server_id": server_id,
-                                        "data": metrics
-                                    });
-                                    message.to_string()
+                                if let Some(server_id_str) = server_id {  // Unwrap Option<String>
+                                    if let Some(metrics) = monitoring.get_server_metrics(&server_id_str).await {
+                                        let message = json!({
+                                            "type": "server_metrics",
+                                            "server_id": server_id_str,
+                                            "data": metrics
+                                        });
+                                        message.to_string()
+                                    } else {
+                                        "".to_string()
+                                    }
                                 } else {
                                     "".to_string()
                                 }
@@ -137,13 +152,25 @@ impl WebSocketConnection {
                             ctx.wait(fut);
                         });
 
-                        self.subscription_handles.insert(server_id.to_string(), handle);
+                        if let Some(server_id_str) = server_id {
+                            if let Ok(mut handles) = self.subscription_handles.lock() {
+                                handles.insert(server_id_str.to_string(), handle);
+                            } else {
+                                log::error!("Failed to lock subscription handles");
+                            }
+                        } else {
+                            log::error!("Server ID is None");
+                        }
                     }
                 }
                 "unsubscribe" => {
                     if let Some(server_id) = command.get("server_id").and_then(|v| v.as_str()) {
-                        if let Some(handle) = self.subscription_handles.remove(server_id) {
-                            ctx.cancel_future(handle);
+                        if let Ok(mut handles) = self.subscription_handles.lock() {
+                            if let Some(handle) = handles.remove(server_id) {
+                                ctx.cancel_future(handle);
+                            }
+                        } else {
+                            log::error!("Failed to lock subscription handles during unsubscribe");
                         }
                     }
                 }

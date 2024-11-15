@@ -1,21 +1,20 @@
-# Builder stage
-FROM rust:1.75 as builder
+# Production Dockerfile
+FROM rust:1.75-slim-bookworm as builder
 
-WORKDIR /usr/src/flick
-RUN cargo new --bin server
-WORKDIR /usr/src/flick/server
+# Install build dependencies
+RUN apt-get update && apt-get install -y \
+    pkg-config \
+    libssl-dev \
+    libpq-dev \
+    build-essential \
+    && rm -rf /var/lib/apt/lists/*
 
-# Copy manifests
-COPY Cargo.toml Cargo.lock ./
+WORKDIR /usr/src/app
 
-# Build dependencies only
-RUN cargo build --release
-RUN rm src/*.rs
+# Copy the entire project
+COPY . .
 
-# Copy source code
-COPY src ./src
-
-# Build application
+# Build the application
 RUN cargo build --release
 
 # Runtime stage
@@ -27,15 +26,14 @@ RUN apt-get update && apt-get install -y \
     ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy binary from builder
-COPY --from=builder /usr/src/flick/server/target/release/flick_server /usr/local/bin/flick_server
+# Copy the built binary
+COPY --from=builder /usr/src/app/target/release/rust_server /usr/local/bin/
+COPY --from=builder /usr/src/app/migrations /migrations
 
-# Set user for security
-RUN useradd -m flick
-USER flick
+# Create a non-root user
+RUN useradd -m appuser
+USER appuser
 
-# Expose the port
 EXPOSE 8080
 
-# Run the binary
-CMD ["flick_server"]
+CMD ["rust_server"]

@@ -1,9 +1,11 @@
 // src/monitoring/mod.rs
 mod collector;
+mod service;
 
 use collector::{MetricsCollector, SystemMetrics};
 use std::sync::Arc;
 use tokio::sync::RwLock;
+//pub use service::*;
 
 #[derive(Clone)]
 pub struct MonitoringService {
@@ -21,6 +23,12 @@ impl MonitoringService {
         service.clone().start();
         service
     }
+
+    // fn clone(&self) -> Self {
+    //     Self {
+    //         collector: self.collector.clone(),
+    //     }
+    // } // clone 함수 일단 추가
 
     fn start(self) {
         tokio::spawn(async move {

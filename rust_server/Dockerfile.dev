@@ -1,0 +1,19 @@
+# Dockerfile.dev for development environment
+FROM rust:1.75-slim-bookworm
+
+# Install build dependencies
+RUN apt-get update && apt-get install -y \
+    pkg-config \
+    libssl-dev \
+    libpq-dev \
+    build-essential \
+    git \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /usr/src/app
+
+# Install cargo watch for development
+RUN cargo install cargo-watch
+
+# Default command for development
+CMD ["cargo", "watch", "-x", "run"]

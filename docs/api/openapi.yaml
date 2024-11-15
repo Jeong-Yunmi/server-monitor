@@ -1,0 +1,472 @@
+openapi: 3.0.3
+info:
+  title: Server Monitoring System API
+  description: |
+    Server monitoring system API provides endpoints for monitoring server resources, 
+    managing alerts, and collecting system metrics in real-time.
+    
+    ## Features
+    - Real-time server metrics monitoring
+    - Process monitoring
+    - Alert management
+    - Authentication and authorization
+    - WebSocket support for live updates
+    
+    ## Authentication
+    This API uses JWT (JSON Web Token) for authentication. Include the JWT token in the
+    Authorization header as a Bearer token:
+    ```
+    Authorization: Bearer <your_token>
+    ```
+  version: 1.0.0
+  contact:
+    name: Development Team
+    url: https://github.com/yourusername/server-monitoring
+    email: your.email@example.com
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: http://localhost:8080/api/v1
+    description: Development server
+  - url: https://api.yourproduction.com/api/v1
+    description: Production server
+
+tags:
+  - name: Authentication
+    description: User authentication and authorization endpoints
+  - name: Servers
+    description: Server management endpoints
+  - name: Metrics
+    description: System metrics collection and monitoring
+  - name: Alerts
+    description: Alert management and notification
+  - name: Health
+    description: System health and status monitoring
+
+paths:
+  /auth/login:
+    post:
+      tags:
+        - Authentication
+      summary: Login to the system
+      description: Authenticate user and return JWT token
+      operationId: login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: admin@example.com
+                password:
+                  type: string
+                  format: password
+                  example: "********"
+      responses:
+        '200':
+          description: Successful login
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '401':
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /servers:
+    get:
+      tags:
+        - Servers
+      summary: List all servers
+      description: Retrieve a list of all registered servers
+      operationId: getServers
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of servers
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Server'
+    post:
+      tags:
+        - Servers
+      summary: Register new server
+      description: Add a new server to the monitoring system
+      operationId: createServer
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateServerRequest'
+      responses:
+        '201':
+          description: Server created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Server'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /servers/{serverId}:
+    get:
+      tags:
+        - Servers
+      summary: Get server details
+      description: Retrieve detailed information about a specific server
+      operationId: getServer
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: serverId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Server details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Server'
+        '404':
+          description: Server not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /servers/{serverId}/metrics:
+    get:
+      tags:
+        - Metrics
+      summary: Get server metrics
+      description: Retrieve current metrics for a specific server
+      operationId: getServerMetrics
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: serverId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: from
+          in: query
+          description: Start timestamp (ISO 8601)
+          schema:
+            type: string
+            format: date-time
+        - name: to
+          in: query
+          description: End timestamp (ISO 8601)
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: Server metrics
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServerMetrics'
+        '404':
+          description: Server not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /servers/{serverId}/processes:
+    get:
+      tags:
+        - Metrics
+      summary: Get server processes
+      description: Retrieve current running processes on a specific server
+      operationId: getServerProcesses
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: serverId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Server processes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ProcessInfo'
+
+  /servers/{serverId}/alerts:
+    get:
+      tags:
+        - Alerts
+      summary: Get server alerts
+      description: Retrieve alerts for a specific server
+      operationId: getServerAlerts
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: serverId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [active, acknowledged, all]
+            default: active
+      responses:
+        '200':
+          description: Server alerts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Alert'
+
+  /health:
+    get:
+      tags:
+        - Health
+      summary: System health check
+      description: Check the health status of the system
+      operationId: healthCheck
+      responses:
+        '200':
+          description: System health status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthStatus'
+
+components:
+  schemas:
+    LoginResponse:
+      type: object
+      properties:
+        token:
+          type: string
+          description: JWT access token
+        user:
+          $ref: '#/components/schemas/User'
+
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+          format: email
+        name:
+          type: string
+        role:
+          type: string
+          enum: [admin, user]
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    Server:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        hostname:
+          type: string
+        ipAddress:
+          type: string
+          format: ipv4
+        location:
+          type: string
+        serverType:
+          type: string
+        isOnline:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    CreateServerRequest:
+      type: object
+      required:
+        - name
+        - hostname
+        - ipAddress
+        - location
+        - serverType
+      properties:
+        name:
+          type: string
+          example: "Production Server 1"
+        hostname:
+          type: string
+          example: "prod-srv-01"
+        ipAddress:
+          type: string
+          format: ipv4
+          example: "192.168.1.100"
+        location:
+          type: string
+          example: "US-East"
+        serverType:
+          type: string
+          example: "application"
+
+    ServerMetrics:
+      type: object
+      properties:
+        cpuUsage:
+          type: number
+          format: float
+          description: CPU usage percentage
+          example: 45.7
+        memoryUsage:
+          type: number
+          format: float
+          description: Memory usage percentage
+          example: 68.2
+        diskUsage:
+          type: number
+          format: float
+          description: Disk usage percentage
+          example: 72.5
+        networkRx:
+          type: integer
+          description: Network bytes received
+          example: 1024000
+        networkTx:
+          type: integer
+          description: Network bytes transmitted
+          example: 512000
+        timestamp:
+          type: string
+          format: date-time
+        processes:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProcessInfo'
+
+    ProcessInfo:
+      type: object
+      properties:
+        pid:
+          type: integer
+          description: Process ID
+          example: 1234
+        name:
+          type: string
+          description: Process name
+          example: "nginx"
+        cpuUsage:
+          type: number
+          format: float
+          description: Process CPU usage percentage
+          example: 2.5
+        memoryUsage:
+          type: integer
+          description: Process memory usage in bytes
+          example: 52428800
+
+    Alert:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        serverId:
+          type: string
+          format: uuid
+        alertType:
+          type: string
+          enum: [cpu_usage, memory_usage, disk_usage]
+        severity:
+          type: string
+          enum: [warning, critical]
+        message:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        acknowledgedAt:
+          type: string
+          format: date-time
+          nullable: true
+
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [ok, degraded, error]
+        database:
+          type: boolean
+        version:
+          type: string
+        uptime:
+          type: integer
+          description: System uptime in seconds
+
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+        message:
+          type: string
+        code:
+          type: integer
+          format: int32
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
