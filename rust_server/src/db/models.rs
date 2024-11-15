@@ -3,7 +3,7 @@
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use sqlx::types::JsonValue;
-use sqlx::Type;
+//use sqlx::Type;
 
 #[derive(Debug, Serialize, Deserialize, sqlx::FromRow)]
 pub struct Server {

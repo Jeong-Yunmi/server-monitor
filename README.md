@@ -59,7 +59,7 @@ graph TB
 1. 환경 변수 설정
 ```env
 DATABASE_URL=postgresql://user:password@localhost/flick
-dKC4IdrUUjbO9CVS+1ETpBPJinRAWrzPn914SB5Vi+g==your-secret-key
+JWT_SECRET=your-secret-key
 RUST_LOG=info
 ```
 

@@ -32,7 +32,7 @@ services:
       DATABASE_URL: "postgres://flickuser:flickpass@timescaledb:5432/flickdb"
       RUST_LOG: "debug"
       RUST_BACKTRACE: 1
-      dKC4IdrUUjbO9CVS+1ETpBPJinRAWrzPn914SB5Vi+g=: "your-development-secret-key"
+      JWT_SECRET: "your-development-secret-key"
     depends_on:
       timescaledb:
         condition: service_healthy

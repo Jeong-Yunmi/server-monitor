@@ -23,8 +23,8 @@ pub fn create_token(user_id: &str, email: &str, role: &str) -> Result<String, Ap
         iat: Utc::now().timestamp(),
     };
 
-    let secret = std::env::var("dKC4IdrUUjbO9CVS+1ETpBPJinRAWrzPn914SB5Vi+g=")
-        .map_err(|_| AppError::AuthError("dKC4IdrUUjbO9CVS+1ETpBPJinRAWrzPn914SB5Vi+g= not set".to_string()))?;
+    let secret = std::env::var("JWT_SECRET")
+        .map_err(|_| AppError::AuthError("JWT_SECRET not set".to_string()))?;
 
     encode(
         &Header::default(),
@@ -35,8 +35,8 @@ pub fn create_token(user_id: &str, email: &str, role: &str) -> Result<String, Ap
 }
 
 pub fn verify_token(token: &str) -> Result<Claims, AppError> {
-    let secret = std::env::var("dKC4IdrUUjbO9CVS+1ETpBPJinRAWrzPn914SB5Vi+g=")
-        .map_err(|_| AppError::AuthError("dKC4IdrUUjbO9CVS+1ETpBPJinRAWrzPn914SB5Vi+g= not set".to_string()))?;
+    let secret = std::env::var("JWT_SECRET")
+        .map_err(|_| AppError::AuthError("JWT_SECRET not set".to_string()))?;
 
     let validation = Validation::default();
     

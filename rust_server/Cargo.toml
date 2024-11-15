@@ -37,8 +37,8 @@ sqlx = { version = "0.7", features = [
 jsonwebtoken = "9.1"
 bcrypt = "0.15"
 
-# 시리얼라이제이션
-serde = { version = "1.0", features = ["derive"] }
+# 시리얼라이제이션 = 직렬화/역직렬화
+serde = { version = "1.0", features = ["derive"] } #JSON
 serde_json = "1.0"
 
 # 시간 관련
@@ -62,3 +62,5 @@ sysinfo = "0.29"
 # OpenAPI/Swagger
 utoipa = { version = "4.1", features = ["actix_extras"] }
 utoipa-swagger-ui = { version = "5.0", features = ["actix-web"] }
+
+# 
